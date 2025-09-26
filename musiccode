@@ -1,0 +1,82 @@
+/*********************************************************
+ * Simple music player using custom backgrounds          *
+ * the program uses mp3 files for music playback         *
+ *                                                       *
+ * Author: Amelia Gannon                                 *
+ *                                                       *
+ * Date: 2025-07-14                                      *
+ *                                                       *
+**********************************************************/
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <unistd.h>
+#include <limits>
+
+void printMenu(const std::vector<std::string>& titles) {
+    std::cout << "\n🎀 Melia Music Player 🎀\n";
+    for (size_t i = 0; i < titles.size(); ++i) {
+        std::cout << (i + 1) << "️⃣  " << "Play: " << titles[i] << "\n";
+    }
+    std::cout << "0️⃣  Exit\n";
+    std::cout << "👉 Choose a song (0–5): ";
+}
+
+int main() {
+    std::vector<std::string> songTitles = {
+        "99 cent store",
+        "black sheep",
+        "bags (live)",
+        "american teenager",
+        "runaway"
+    };
+
+    std::vector<std::string> songPaths = {
+        "assets/music/song1.mp3",
+        "assets/music/song2.mp3",
+        "assets/music/song3.mp3",
+        "assets/music/song4.mp3",
+        "assets/music/song5.mp3"
+    };
+
+    int choice;
+    bool running = true;
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    std::string basePath(cwd);
+
+    while (running) {
+        printMenu(songTitles);
+        std::cin >> choice;
+
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "⚠️ Please enter a number!\n";
+            continue;
+        }
+
+        if (choice >= 1 && choice <= 5) {
+            std::string fullPath = "/Users/ameliagannon/Desktop/MeliaMusicPlayer/" + songPaths[choice - 1];
+
+            std::string command = "mpg123 \"" + fullPath + "\"";
+
+            std::cout << "\n🎵 Now playing: " << songTitles[choice - 1] << "\n";
+            std::cout << "📂 Full path: " << fullPath << "\n";
+
+            int result = system(command.c_str());
+            if (result != 0) {
+                std::cout << "❌ Error: mpg123 failed with code " << result << "\n";
+            }
+        } else if (choice == 0) {
+            std::cout << "👋 Bye! Thanks for listening 🎶\n";
+            running = false;
+        } else {
+            std::cout << "🤔 Invalid choice. Please enter 0–5.\n";
+        }
+    }
+
+    return 0;
+}

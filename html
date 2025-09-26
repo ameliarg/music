@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Melia Music Player</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #FFEDFB, #EFA3E1);
+      font-family: 'Cherry Bomb One', cursive;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #starshine {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .shine {
+      position: absolute;
+      background-image: url("data:image/svg+xml,%3Csvg fill='white' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l1.06 4.47L17 7l-3.47 2.53L14 14l-2-2-2 2 1.47-4.47L7 7l3.94-.53L12 2z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: contain;
+      opacity: 0;
+      animation: glitter 6s linear infinite;
+    }
+
+    .shine.small { width: 20px; height: 20px; }
+    .shine.medium { width: 30px; height: 30px; }
+    .shine.large { width: 50px; height: 50px; }
+
+    @keyframes glitter {
+      0% { transform: scale(0.3) rotate(0deg); opacity: 0; }
+      25% { transform: scale(1) rotate(360deg); opacity: 1; }
+      50% { transform: scale(0.3) rotate(720deg); opacity: 0; }
+      100% { transform: scale(0.3) rotate(0deg); opacity: 0; }
+    }
+
+    .player {
+      background: #FFE9F2;
+      border-radius: 20px;
+      padding: 30px;
+      width: 320px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .gif {
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .now-playing-label {
+      font-size: 14px;
+      color: #B184A7;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .song-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #6B4D7A;
+      text-align: center;
+      margin-bottom: 2px;
+    }
+
+    .song-artist {
+      font-size: 13px;
+      color: #A176A7;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+
+    .controls button {
+      background-color: #BA96D0;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .controls button:hover {
+      background-color: #a07cbf;
+    }
+
+    .controls svg {
+      width: 24px;
+      height: 24px;
+      fill: #FFE9F2;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background: #f0c9e0;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 100%;
+      background: #BA96D0;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .time {
+      font-size: 12px;
+      color: #6B4D7A;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="starshine"></div>
+  
+
+  <div class="player">
+    <img src="assets/cinnamoroll.gif" alt="Now Playing" class="gif" />
+    <div class="now-playing-label">Now Playing</div>
+    <div class="song-title" id="song-title">—</div>
+    <div class="song-artist" id="song-artist">—</div>
+
+    <div class="progress-container" id="progress-container">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="time">
+      <span id="current-time">0:00</span>
+      <span id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+      <button onclick="skip(-1)">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button onclick="togglePlayPause()" id="play-btn">
+        <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pause-icon" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button onclick="skip(1)">
+        <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      { title: "runaway", artist: "mars argo", path: "assets/music/song1.mp3" },
+      { title: "black sheep", artist: "metric", path: "assets/music/song2.mp3" },
+      { title: "bags", artist: "clairo", path: "assets/music/song3.mp3" },
+      { title: "American teenager", artist: "ethel cain", path: "assets/music/song4.mp3" },
+      { title: "99 cent store", artist: "melanie martinez", path: "assets/music/song5.mp3" },
+      { title: "using you", artist: "mars argo", path: "assets/music/song6.mp3" }
+    ];
+
+    let currentSongIndex = 0;
+    const audio = new Audio();
+    const titleDisplay = document.getElementById('song-title');
+    const artistDisplay = document.getElementById('song-artist');
+    const playBtn = document.getElementById('play-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const progress = document.getElementById('progress');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function playSong(index) {
+      currentSongIndex = index;
+      const song = songs[index];
+      audio.src = song.path;
+      audio.play();
+      titleDisplay.textContent = song.title;
+      artistDisplay.textContent = `by ${song.artist}`;
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    }
+
+    function togglePlayPause() {
+      if (!audio.src) {
+        playSong(currentSongIndex);
+      } else if (audio.paused) {
+        audio.play();
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+      } else {
+        audio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+      }
+    }
+
+    function skip(direction) {
+      currentSongIndex += direction;
+      if (currentSongIndex >= songs.length) currentSongIndex = 0;
+      if (currentSongIndex < 0) currentSongIndex = songs.length - 1;
+      playSong(currentSongIndex);
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      const progressPercent = (audio.currentTime / audio.duration) * 100;
+      progress.style.width = `${progressPercent}%`;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+      if (!isNaN(audio.duration)) {
+        durationEl.textContent = formatTime(audio.duration);
+      }
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    });
+
+    audio.addEventListener('ended', () => {
+      skip(1);
+    });
+
+    // Sparkles
+    const sparkleContainer = document.getElementById('starshine');
+    const sparkleCount = 25;
+    const sizes = ['small', 'medium', 'large'];
+
+    for (let i = 0; i < sparkleCount; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('shine', sizes[Math.floor(Math.random() * sizes.length)]);
+      sparkle.style.top = Math.random() * 100 + '%';
+      sparkle.style.left = Math.random() * 100 + '%';
+      sparkle.style.animationDelay = `${Math.random() * 8}s`;
+      sparkleContainer.appendChild(sparkle);
+    }
+  </script>
+</body>
+</html>
